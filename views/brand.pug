@@ -1,0 +1,88 @@
+doctype html
+html
+    head
+        meta(charset='utf-8')
+    body
+        header 
+            div gnb section
+        br
+        input#text(type="text" placeholder="검색")
+        br
+        div(class='num')
+        div(class='contents-wrap')         
+        br
+        footer footer section
+
+
+        script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")
+        script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+        script(src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js") 
+        script(type='text/javascript').
+
+            //데이터 함수
+            function handleData() {
+                axios({
+                    method: 'get',
+                    url: '브랜드 불러오는 URL',
+                    responseType: 'json'
+                })
+                    .then((response) => {
+                        //- brandData = JSON.stringify(response.data); // JSON을 문자로
+                        //- brandData = JSON.parse(response.data); // 문자를 JSON으로
+
+                        const brandData = response.data[0].items;
+                        const keyval = document.getElementById('text').value; 
+                        const brandList = [];
+
+                        console.log(keyval)
+                
+
+                        for(let i = 0; i < brandData.length; i++) {
+            
+                            if(!!brandData[i]) {
+                                const brandEng = brandData[i].brandEng;
+                                const brandKor = brandData[i].brandKor;
+
+                                if(brandEng.indexOf(keyval.toUpperCase()) > -1 || brandKor.indexOf(keyval) > -1 ) {
+                                    brandList.push(brandData[i]);
+                                }
+                            }
+
+                        }
+
+                        showBrandList(brandList);
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            }
+
+            function showBrandList(brandList) {
+                let brandCounts = brandList.length;
+                let showList = $('.contents-wrap');
+                showList.empty();
+
+                //브랜드 수 잘 나오는지 확인하려고 작성 
+                $('.num').empty();
+                $('.num').append(`<span>${brandCounts}</span>`)
+
+                for(let i = 0; i  < brandCounts; i++) {    
+    
+                     if(!!brandList[i]) {
+                        showList.append(`
+                            <div class="brand-info" style="padding: 5px 10px;">
+                                <span class="img" style="display: inline-block; vertical-align: middle;"><img src='${brandList[i].image}' style="width: 45px; height: 45px; border-radius: 50%;"/></span>
+                                <span class="kor" style="vertical-align: middle;">${brandList[i].brandKor}</span>
+                                <span class="eng" style="vertical-align: middle;">${brandList[i].brandEng}</span>
+                            </div>`
+                        );
+                    }
+                }
+            }
+
+            window.onload = () => {
+                handleData();
+                document.getElementById('text').onkeyup = _.debounce(handleData, 300);
+            }
+            
+       
